@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>{{title}}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/style.css">
+
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat+Alternates:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+
+    <style>
+body {
+  margin: 0;
+  background: #111827;
+  color: #e6eef8;
+  font-family: 'Montserrat Alternates', sans-serif;
+}
+
+
+.content {
+  max-width: 1200px;
+  margin: auto;
+}
+
+
+p.intro {
+  font-size: 24px;
+  line-height: 1.6;
+  max-width: 900px;
+}
+
+
+h2 {
+  margin-top: 50px;
+  margin-botto: 30px;
+  font-weight: 400;
+}
+
+.projects {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 40px;
+  width: 100%;
+  padding: 0 60px;
+  box-sizing: border-box;
+}
+
+.project img {
+  width: 100%;
+  aspect-ratio: 4 / 3;     
+  object-fit: cover;        
+  box-sizing: border-box;
+  border-radius: 8px;
+}
+
+@media (max-width: 900px) {
+  .projects {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 500px) {
+  .projects {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+    </style>
+  </head>
+  <body>
+    <nav>
+      <a href="./index.html">elisapaci</a>
+      <a href="./info.html">info</a>
+      <a href="./logos.html">logos</a>
+      <a href="https://www.elisapaciphotography.com/">photos</a>
+    </nav>
+    <main>
+      {{{content}}}
+    </main>
+    <footer>
+      <p>elisapacit@gmail.com</p>
+    </footer>
+  </body>
+</html>
