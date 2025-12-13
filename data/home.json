@@ -1,0 +1,9 @@
+{
+  "title": "Home",
+  "description": "This site is generated using Mustache.js",
+  "features": [
+    "Fast",
+    "Simple",
+    "No database"
+  ]
+}

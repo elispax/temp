@@ -1,0 +1,7 @@
+[
+  {
+    "template": "home.mustache",
+    "output": "index.html",
+    "data": "home.json"
+  }
+]
