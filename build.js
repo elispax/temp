@@ -1,54 +1,102 @@
-const fs = require("fs");
-const path = require("path");
-const mustache = require("mustache");
+const fs = require('fs');
+const path = require('path');
+const mustache = require('mustache');
 
-const templatesDir = path.join(__dirname, "templates");
-const dataDir = path.join(__dirname, "data");
-const pagesFile = path.join(__dirname, "pages/pages.json");
-const distDir = path.join(__dirname, "dist");
+// --- Configuration ---
+const CONFIG = {
+    indexTitle: 'elisapaci',
+    template: './template.html',
+    src: './pages',
+    dest: './docs'
+};
 
-if (!fs.existsSync(distDir)) {
-  fs.mkdirSync(distDir);
+/**
+ * Helper: Formats a filename into a title
+ * e.g., "my-cool-page.html" -> "My Cool Page"
+ */
+function prettyTitle(filename) {
+    const name = path.parse(filename).name;
+    return name
+        .replace("index", CONFIG.indexTitle)
+        .replace(/[-_]/g, ' ')
+        .replace(/\b\w/g, char => char.toUpperCase());
 }
 
-const siteData = JSON.parse(
-  fs.readFileSync(path.join(dataDir, "site.json"))
-);
+/**
+ * Core rendering logic for HTML files
+ */
+function processHtml(srcPath, destPath, template) {
+    const content = fs.readFileSync(srcPath, 'utf8');
+    const title = prettyTitle(srcPath);
+    
+    // Render content into the template
+    const output = mustache.render(template, {
+        title: title,
+        content: content
+    });
 
-const pages = JSON.parse(fs.readFileSync(pagesFile));
+    fs.writeFileSync(destPath, output);
+    console.log(`📝 Rendered: ${path.basename(srcPath)}`);
+}
 
-pages.forEach(page => {
-  const template = fs.readFileSync(
-    path.join(templatesDir, page.template),
-    "utf8"
-  );
+/**
+ * Core copying logic for non-HTML files (images, css, etc.)
+ */
+function copyAsset(srcPath, destPath) {
+    fs.copyFileSync(srcPath, destPath);
+    console.log(`📦 Copied:   ${path.basename(srcPath)}`);
+}
 
-  const pageData = JSON.parse(
-    fs.readFileSync(path.join(dataDir, page.data))
-  );
+/**
+ * Recursive function to traverse directories
+ */
+function traverseAndBuild(currentDir, outputDir, template) {
+    // Ensure the output directory exists
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+    }
 
-  // merge global + page data
-  const view = {
-    site: siteData,
-    ...pageData
-  };
+    const items = fs.readdirSync(currentDir);
 
-  // render page content
-  const content = mustache.render(template, view);
+    items.forEach(item => {
+        const srcPath = path.join(currentDir, item);
+        const destPath = path.join(outputDir, item);
+        const stats = fs.statSync(srcPath);
 
-  // wrap in layout
-  const layout = fs.readFileSync(
-    path.join(templatesDir, "layout.mustache"),
-    "utf8"
-  );
+        if (stats.isDirectory()) {
+            // Recurse into subdirectories
+            traverseAndBuild(srcPath, destPath, template);
+        } else if (stats.isFile()) {
+            // Check extension
+            if (path.extname(item).toLowerCase() === '.html') {
+                processHtml(srcPath, destPath, template);
+            } else {
+                copyAsset(srcPath, destPath);
+            }
+        }
+    });
+}
 
-  const finalHtml = mustache.render(layout, {
-    ...view,
-    content
-  });
+/**
+ * Main Execution
+ */
+function build() {
+    console.time('Build Time');
+    console.log('🚀 Starting build...');
 
-  const outputPath = path.join(distDir, page.output);
+    try {
+        // 1. Load the Mustache template
+        const template = fs.readFileSync(CONFIG.template, 'utf8');
 
-  fs.writeFileSync(outputPath, finalHtml);
-  console.log(`✅ Built: ${page.output}`);
-});
+        // 2. Start traversal
+        traverseAndBuild(CONFIG.src, CONFIG.dest, template);
+
+        console.log('\n✅ Build complete!');
+    } catch (err) {
+        console.error('\n❌ Build failed:', err.message);
+        process.exit(1);
+    }
+    console.timeEnd('Build Time');
+}
+
+build();
