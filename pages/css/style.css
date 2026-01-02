@@ -288,6 +288,7 @@ border-radius: 8px;
   .case-hero,
   .grid-section {
     grid-template-columns: 1fr;
+    padding-bottom: 16px;
   }
 
   main {
